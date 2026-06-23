@@ -42,7 +42,7 @@ function RevealCard({ children, delay = 0 }) {
   )
 }
 
-/* Individual plant card */
+/* Individual plant card — works for both registrations and featured photos */
 function PlantCard({ plant }) {
   const [imgError, setImgError] = useState(false)
 
@@ -50,9 +50,9 @@ function PlantCard({ plant }) {
     <div className="rounded-2xl overflow-hidden shadow-sm bg-white border border-forest/8 cursor-default select-none">
 
       {/* Photo */}
-      {plant.first_photo_url && !imgError ? (
+      {plant.photo_url && !imgError ? (
         <img
-          src={plant.first_photo_url}
+          src={plant.photo_url}
           alt={plant.plant_name}
           className="w-full object-cover"
           style={{ display: 'block' }}
@@ -60,17 +60,13 @@ function PlantCard({ plant }) {
           loading="lazy"
         />
       ) : (
-        /* Placeholder green rectangle */
         <div
           className="w-full flex items-center justify-center"
           style={{ height: 200, backgroundColor: '#1f3d2b' }}
           aria-hidden="true"
         >
           <svg width="40" height="50" viewBox="0 0 40 50" fill="none">
-            <path
-              d="M20 4 C32 12 36 32 26 42 C19 50 4 46 2 34 C-2 20 8 6 20 4 Z"
-              fill="rgba(201,169,110,0.35)"
-            />
+            <path d="M20 4 C32 12 36 32 26 42 C19 50 4 46 2 34 C-2 20 8 6 20 4 Z" fill="rgba(201,169,110,0.35)" />
             <line x1="20" y1="4" x2="20" y2="48" stroke="rgba(201,169,110,0.5)" strokeWidth="1.2" />
           </svg>
         </div>
@@ -94,23 +90,26 @@ function PlantCard({ plant }) {
           {plant.plant_name}
         </h3>
 
-        {/* Person name — links to their profile */}
-        <Link
-          to={`/person/${encodeURIComponent(plant.phone)}`}
-          className="block font-sans text-forest/70 text-base leading-snug hover:text-terracotta transition-colors duration-150 hover:underline underline-offset-2"
-          onClick={e => e.stopPropagation()}
-        >
-          {plant.full_name}
-        </Link>
+        {/* Source name — link for registrations, plain text for featured */}
+        {plant.type === 'registration' && plant.phone ? (
+          <Link
+            to={`/person/${encodeURIComponent(plant.phone)}`}
+            className="block font-sans text-forest/70 text-base leading-snug hover:text-terracotta transition-colors duration-150 hover:underline underline-offset-2"
+            onClick={e => e.stopPropagation()}
+          >
+            {plant.display_name}
+          </Link>
+        ) : (
+          <p className="font-sans text-forest/50 text-base leading-snug italic">
+            {plant.display_name}
+          </p>
+        )}
 
         {/* Location */}
         {plant.location && (
           <p className="font-sans text-forest/45 text-sm mt-1 leading-snug flex items-center gap-1">
             <svg width="11" height="13" viewBox="0 0 12 14" fill="none" aria-hidden="true">
-              <path
-                d="M6 1C3.79 1 2 2.79 2 5c0 3 4 8 4 8s4-5 4-8c0-2.21-1.79-4-4-4z"
-                stroke="currentColor" strokeWidth="1.3" fill="none"
-              />
+              <path d="M6 1C3.79 1 2 2.79 2 5c0 3 4 8 4 8s4-5 4-8c0-2.21-1.79-4-4-4z" stroke="currentColor" strokeWidth="1.3" fill="none" />
               <circle cx="6" cy="5" r="1.2" fill="currentColor" />
             </svg>
             {plant.location}
@@ -145,27 +144,59 @@ export default function Gallery() {
   const [activeFilter,  setActiveFilter]  = useState('All')
 
   useEffect(() => {
-    async function fetchPlants() {
+    async function fetchAll() {
       if (!supabase) {
         setFetchError('Supabase client not initialised — check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env')
         setLoading(false)
         return
       }
-      const { data, error } = await supabase
-        .from('tggi_registrations')
-        .select('id, full_name, plant_name, category, location, first_photo_url, phone')
-        .order('created_at', { ascending: false })
 
-      console.log('[Gallery] Supabase response — data:', data, '| error:', error)
+      const [
+        { data: regs,     error: regErr  },
+        { data: featured, error: featErr },
+      ] = await Promise.all([
+        supabase
+          .from('tggi_registrations')
+          .select('id, full_name, plant_name, category, location, first_photo_url, phone')
+          .eq('is_approved', true)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('tggi_featured_photos')
+          .select('id, plant_name, category, photo_url, location, source_name')
+          .order('created_at', { ascending: false }),
+      ])
 
-      if (error) {
-        setFetchError(`Supabase error: ${error.message}`)
-      } else {
-        setPlants(data ?? [])
-      }
+      console.log('[Gallery] registrations:', regs, regErr, '| featured:', featured, featErr)
+
+      if (regErr) { setFetchError(`Supabase error: ${regErr.message}`); setLoading(false); return }
+
+      const normalised = [
+        ...(regs ?? []).map(r => ({
+          id:           `reg-${r.id}`,
+          type:         'registration',
+          photo_url:    r.first_photo_url,
+          plant_name:   r.plant_name,
+          category:     r.category,
+          location:     r.location,
+          display_name: r.full_name,
+          phone:        r.phone,
+        })),
+        ...(featured ?? []).map(f => ({
+          id:           `feat-${f.id}`,
+          type:         'featured',
+          photo_url:    f.photo_url,
+          plant_name:   f.plant_name,
+          category:     f.category,
+          location:     f.location,
+          display_name: f.source_name ?? 'Nirvana Yoga Global',
+          phone:        null,
+        })),
+      ]
+
+      setPlants(normalised)
       setLoading(false)
     }
-    fetchPlants()
+    fetchAll()
   }, [])
 
   const filtered = activeFilter === 'All'

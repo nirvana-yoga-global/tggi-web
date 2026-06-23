@@ -64,12 +64,22 @@ function PlantCard({ plant, updates }) {
 
       {/* Info */}
       <div className="px-4 pt-3.5 pb-5">
-        <span
-          className="inline-block font-sans text-xs font-bold uppercase tracking-wider text-white rounded-full px-3 py-1 mb-2"
-          style={{ backgroundColor: '#c4623d' }}
-        >
-          {plant.category}
-        </span>
+        <div className="flex flex-wrap items-center gap-2 mb-2">
+          <span
+            className="inline-block font-sans text-xs font-bold uppercase tracking-wider text-white rounded-full px-3 py-1"
+            style={{ backgroundColor: '#c4623d' }}
+          >
+            {plant.category}
+          </span>
+          {!plant.is_approved && (
+            <span
+              className="inline-block font-sans text-xs font-semibold rounded-full px-3 py-1"
+              style={{ backgroundColor: 'rgba(201,169,110,0.18)', color: '#7a5c1e', border: '1px solid rgba(201,169,110,0.4)' }}
+            >
+              Pending Review
+            </span>
+          )}
+        </div>
 
         <h3
           className="font-serif font-semibold text-forest leading-snug mb-1"
@@ -131,7 +141,7 @@ export default function MyGarden() {
 
     const { data: regs, error: regErr } = await supabase
       .from('tggi_registrations')
-      .select('id, created_at, full_name, plant_name, category, location, first_photo_url, status')
+      .select('id, created_at, full_name, plant_name, category, location, first_photo_url, status, is_approved')
       .eq('phone', trimmed)
       .order('created_at', { ascending: true })
 
