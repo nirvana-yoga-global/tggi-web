@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const CATEGORIES = [
@@ -93,10 +94,14 @@ function PlantCard({ plant }) {
           {plant.plant_name}
         </h3>
 
-        {/* Person name */}
-        <p className="font-sans text-forest/70 text-base leading-snug">
+        {/* Person name — links to their profile */}
+        <Link
+          to={`/person/${encodeURIComponent(plant.phone)}`}
+          className="block font-sans text-forest/70 text-base leading-snug hover:text-terracotta transition-colors duration-150 hover:underline underline-offset-2"
+          onClick={e => e.stopPropagation()}
+        >
           {plant.full_name}
-        </p>
+        </Link>
 
         {/* Location */}
         {plant.location && (
@@ -148,7 +153,7 @@ export default function Gallery() {
       }
       const { data, error } = await supabase
         .from('tggi_registrations')
-        .select('id, full_name, plant_name, category, location, first_photo_url')
+        .select('id, full_name, plant_name, category, location, first_photo_url, phone')
         .order('created_at', { ascending: false })
 
       console.log('[Gallery] Supabase response — data:', data, '| error:', error)
