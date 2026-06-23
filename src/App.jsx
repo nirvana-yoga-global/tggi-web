@@ -1,24 +1,19 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
-import Hero        from './components/Hero'
-import Story       from './components/Story'
-import Pillars     from './components/Pillars'
-import Lifecycle   from './components/Lifecycle'
-import ImpactStats from './components/ImpactStats'
-import ClosingCTA  from './components/ClosingCTA'
-import Footer      from './components/Footer'
+import Navbar   from './components/Navbar'
+import Footer   from './components/Footer'
+import Home     from './pages/Home'
+import Register from './pages/Register'
 
 export default function App() {
   return (
-    <>
-      <main>
-        <Hero />
-        <Story />
-        <Pillars />
-        <Lifecycle />
-        <ImpactStats />
-        <ClosingCTA />
-      </main>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/"         element={<Home />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
       <Footer />
-    </>
+    </BrowserRouter>
   )
 }

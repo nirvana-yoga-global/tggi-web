@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useScrollReveal } from '../hooks/useScrollReveal'
 
 export default function ClosingCTA() {
@@ -6,13 +7,35 @@ export default function ClosingCTA() {
   const ctaRef     = useScrollReveal()
 
   return (
-    <section className="bg-cream py-24 sm:py-32 lg:py-40">
-      <div className="max-w-3xl mx-auto px-6 text-center">
+    <section
+      className="relative py-24 sm:py-32 lg:py-40 overflow-hidden"
+      style={{ backgroundColor: '#1f3d2b' }}
+    >
+      {/* ── Watermark leaf ── */}
+      <div
+        className="absolute pointer-events-none select-none"
+        style={{ right: '-6%', bottom: '-4%', zIndex: 1 }}
+        aria-hidden="true"
+      >
+        <svg width="480" viewBox="0 0 280 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M140 10 C215 40 245 145 205 230 C175 295 85 315 40 265 C-15 205 12 82 140 10 Z"
+            fill="#2d5a3d"
+            opacity="0.5"
+          />
+          <line x1="140" y1="10" x2="140" y2="310" stroke="#2d5a3d" strokeWidth="1.5" opacity="0.35" />
+        </svg>
+      </div>
+
+      <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
+
+        {/* ── Gold accent ── */}
+        <p className="text-3xl mb-8" style={{ color: '#c9a96e' }} aria-hidden="true">✦</p>
 
         {/* ── Heading ── */}
         <div ref={headingRef} className="reveal mb-8">
           <h2
-            className="font-serif font-semibold text-forest leading-[1.1]"
+            className="font-serif font-semibold text-cream leading-[1.1]"
             style={{ fontSize: 'clamp(1.9rem, 5vw, 3.5rem)' }}
           >
             Let Us Teach Our Children to Reconnect with the Earth
@@ -26,23 +49,14 @@ export default function ClosingCTA() {
           style={{ transitionDelay: '0.2s' }}
         >
           <p
-            className="font-sans text-forest/75 leading-[1.85] mx-auto"
-            style={{ fontSize: 'clamp(1rem, 2vw, 1.2rem)' }}
+            className="font-sans leading-[1.85] mx-auto"
+            style={{ fontSize: 'clamp(1rem, 2vw, 1.2rem)', color: 'rgba(250,247,240,0.80)' }}
           >
-            Today's children grow up surrounded by screens — connected to everything
-            except the living world beneath their feet. They can swipe, stream, and
-            scroll, yet many have never felt the quiet joy of pressing a seed into
-            soil and watching it rise toward the light.
-          </p>
-
-          <p
-            className="font-sans text-forest/75 leading-[1.85] mx-auto mt-6"
-            style={{ fontSize: 'clamp(1rem, 2vw, 1.2rem)' }}
-          >
-            TGGI is an invitation — to bring our children back to nature, to
-            responsibility, and to compassion. One small plant, tended with care,
-            teaches patience, humility, and wonder in ways no classroom can.
-            The Earth is waiting. So is the child within each of us.
+            Our children are growing up surrounded by screens, yet quietly disconnected
+            from the living world around them — from soil, from seasons, from the patient
+            miracle of something growing. This is an invitation to bring them back — to
+            nature, to responsibility, to compassion. It begins with a single plant, and
+            a single soul willing to care for it.
           </p>
         </div>
 
@@ -52,8 +66,8 @@ export default function ClosingCTA() {
           className="reveal"
           style={{ transitionDelay: '0.4s' }}
         >
-          <a
-            href="/register"
+          <Link
+            to="/register"
             className="
               breathe
               inline-flex items-center justify-center
@@ -67,7 +81,7 @@ export default function ClosingCTA() {
             "
           >
             Register Your Plant
-          </a>
+          </Link>
         </div>
 
       </div>

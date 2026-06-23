@@ -19,15 +19,18 @@ export default function Footer() {
           flex flex-col items-center text-center gap-10"
       >
 
-        {/* ── Tagline ── */}
+        {/* ── Tagline — large gold italic serif centrepiece ── */}
         <div>
           <p
-            className="font-serif font-semibold text-cream leading-snug"
-            style={{ fontSize: 'clamp(1.6rem, 4vw, 2.6rem)' }}
+            className="font-serif italic font-semibold leading-tight"
+            style={{
+              fontSize: 'clamp(2.8rem, 8vw, 5.5rem)',
+              color: '#c9a96e',
+            }}
           >
             One Earth. One Future.
           </p>
-          <div className="w-10 h-px bg-terracotta mx-auto mt-5" aria-hidden="true" />
+          <div className="w-10 h-px mx-auto mt-6" style={{ backgroundColor: '#c9a96e' }} aria-hidden="true" />
         </div>
 
         {/* ── Nav links ── */}

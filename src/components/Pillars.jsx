@@ -6,25 +6,25 @@ const PILLARS = [
     id: 1,
     Icon: TreePine,
     label: 'Plant Trees',
-    description: 'Grow native, medicinal, and rare saplings that restore biodiversity.',
+    description: 'Grow life wherever you stand.',
   },
   {
     id: 2,
     Icon: Droplet,
     label: 'Save Water',
-    description: 'Harvest rainwater, reduce runoff, and protect our rivers and wells.',
+    description: 'Honour every drop we are given.',
   },
   {
     id: 3,
     Icon: Recycle,
     label: 'Reduce Waste',
-    description: 'Compost, reuse, and refuse single-use materials every single day.',
+    description: 'Take less, return more.',
   },
   {
     id: 4,
     Icon: Lightbulb,
     label: 'Save Energy',
-    description: 'Choose natural light, switch off what is idle, live with less.',
+    description: 'Live lightly upon the Earth.',
   },
 ]
 

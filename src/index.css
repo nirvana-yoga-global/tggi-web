@@ -65,3 +65,14 @@ body {
 .breathe {
   animation: meditative-breath 4.5s ease-in-out infinite;
 }
+
+/* ── Register page: leaf draw animation (success screen) ─── */
+@keyframes leaf-outline-draw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes leaf-vein-fade {
+  from { stroke-opacity: 0; }
+  to   { stroke-opacity: 0.45; }
+}

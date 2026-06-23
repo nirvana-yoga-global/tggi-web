@@ -1,107 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
-
-/*
- * Leaves use position:fixed so they float in the viewport for the full hero
- * scroll instead of scrolling off the top (the absolute-position problem).
- * IntersectionObserver fades them out once the hero section leaves view.
- *
- * Three nested divs per leaf:
- *   1. Outer  — fixed position + scroll-driven translateY
- *   2. Middle — static base rotation (kept separate so it doesn't fight the animation)
- *   3. Inner  — CSS sway animation (rotate ±5°, stem-pivot transform-origin)
- */
-const LEAVES = [
-  {
-    id: 1,
-    viewBox: '0 0 52 80',
-    path: 'M26 1 C46 12 52 42 36 66 C28 78 6 76 2 58 C-4 38 8 10 26 1 Z',
-    width: 115,
-    pos: { top: '8%', left: '5%' },
-    baseRotate: -20,
-    speed: 0.22,
-    opacity: 0.42,
-    fill: '#c8e6cc',        // sage green — clearly visible on dark bg
-    swayDuration: 6,
-    swayDelay: 0,
-  },
-  {
-    id: 2,
-    viewBox: '0 0 48 72',
-    path: 'M24 0 C44 10 50 38 32 62 C22 76 2 70 0 52 C-2 30 8 8 24 0 Z',
-    width: 88,
-    pos: { top: '24%', right: '6%' },
-    baseRotate: 32,
-    speed: 0.35,
-    opacity: 0.36,
-    fill: '#f0ece2',        // warm cream
-    swayDuration: 8,
-    swayDelay: -2.5,
-  },
-  {
-    id: 3,
-    viewBox: '0 0 44 68',
-    path: 'M22 0 C40 8 46 36 30 58 C20 70 0 64 0 46 C0 24 8 6 22 0 Z',
-    width: 72,
-    pos: { top: '44%', left: '3%' },
-    baseRotate: 10,
-    speed: 0.12,
-    opacity: 0.38,
-    fill: '#b2d8b8',        // slightly richer sage
-    swayDuration: 7,
-    swayDelay: -1.5,
-  },
-]
+import { Link } from 'react-router-dom'
 
 export default function Hero() {
-  const heroRef  = useRef(null)
-  const [scrollY,    setScrollY]    = useState(0)
-  const [isMobile,   setIsMobile]   = useState(true)
-  const [heroInView, setHeroInView] = useState(true)
-
-  /* desktop/mobile breakpoint */
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
-    check()
-    window.addEventListener('resize', check, { passive: true })
-    return () => window.removeEventListener('resize', check)
-  }, [])
-
-  /* hide leaves when hero exits viewport */
-  useEffect(() => {
-    const el = heroRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => setHeroInView(entry.isIntersecting),
-      { threshold: 0 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  /* scroll → translateY for parallax drift */
-  useEffect(() => {
-    if (isMobile) return
-    let ticking = false
-    const onScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          setScrollY(window.scrollY)
-          ticking = false
-        })
-        ticking = true
-      }
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [isMobile])
-
   return (
     <section
-      ref={heroRef}
-      className="relative min-h-screen flex flex-col overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
       aria-label="Hero — One Soul. One Tree."
+      style={{ backgroundColor: '#1f3d2b' }}
     >
-      {/* ── Background image ── */}
+      {/* ── Background forest photo ── */}
       <div
         className="absolute inset-0 z-0 bg-center bg-cover"
         style={{
@@ -111,7 +17,7 @@ export default function Hero() {
         aria-hidden="true"
       />
 
-      {/* ── Gradient overlay (bottom-to-top dark) ── */}
+      {/* ── Gradient overlay ── */}
       <div
         className="absolute inset-0 z-10"
         style={{
@@ -121,72 +27,47 @@ export default function Hero() {
         aria-hidden="true"
       />
 
-      {/* ── Parallax leaves (desktop only, fixed-position so they persist through scroll) ── */}
-      {!isMobile && LEAVES.map((leaf) => (
-        <div
-          key={leaf.id}
-          aria-hidden="true"
-          style={{
-            position: 'fixed',
-            ...leaf.pos,
-            /* scroll drift — faster leaves appear closer to camera */
-            transform: `translateY(${scrollY * leaf.speed}px) rotate(${leaf.baseRotate}deg)`,
-            /* fade out when hero leaves viewport */
-            opacity: heroInView ? leaf.opacity : 0,
-            transition: 'opacity 1.2s ease',
-            zIndex: 15,
-            pointerEvents: 'none',
-            willChange: 'transform',
-          }}
-        >
-          {/* inner wrapper carries the sway animation independently of the scroll transform */}
-          <div
-            style={{
-              animation: `leaf-sway ${leaf.swayDuration}s ease-in-out ${leaf.swayDelay}s infinite`,
-              transformOrigin: '50% 85%',  /* pivot near stem for natural sway */
-            }}
+      {/* ── Content ── */}
+      <div className="relative z-20 flex flex-col items-center px-6 pt-24 pb-16 sm:pb-20 text-center">
+
+        {/* Eyebrow */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-8 sm:w-12 h-px" style={{ backgroundColor: '#c9a96e' }} aria-hidden="true" />
+          <p
+            className="font-sans font-semibold uppercase tracking-[0.22em] leading-none"
+            style={{ color: '#c9a96e', fontSize: '0.65rem' }}
           >
-            <svg
-              width={leaf.width}
-              viewBox={leaf.viewBox}
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d={leaf.path} fill={leaf.fill} />
-            </svg>
-          </div>
+            Thapovanam Grow Green Initiative
+          </p>
+          <div className="w-8 sm:w-12 h-px" style={{ backgroundColor: '#c9a96e' }} aria-hidden="true" />
         </div>
-      ))}
 
-      {/* ── Push content to lower portion ── */}
-      <div className="flex-1" aria-hidden="true" />
-
-      {/* ── Main content ── */}
-      <div className="relative z-30 flex flex-col items-center px-6 pb-10 sm:pb-14 text-center">
-
+        {/* Headline */}
         <h1
-          className="font-serif font-semibold leading-[1.05] text-cream mb-5"
-          style={{ fontSize: 'clamp(2.6rem, 8vw, 6rem)' }}
+          className="font-serif font-semibold leading-[1.0] text-cream mb-7"
+          style={{ fontSize: 'clamp(4.5rem, 13vw, 9.5rem)' }}
         >
-          One Soul. One Tree.
+          One Soul.<br />One Tree.
         </h1>
 
+        {/* Subheadline */}
         <p
-          className="font-sans text-cream/90 leading-relaxed max-w-sm sm:max-w-xl md:max-w-2xl mb-9"
-          style={{ fontSize: 'clamp(1rem, 2.2vw, 1.25rem)' }}
+          className="font-sans text-cream/80 leading-relaxed max-w-sm sm:max-w-xl mb-10"
+          style={{ fontSize: 'clamp(1rem, 2.2vw, 1.2rem)' }}
         >
           A movement to reconnect humanity with nature — one sapling, one soul,
           one act of care at a time.
         </p>
 
-        {/* Buttons — stacked on mobile, row on sm+ */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 mb-12 w-full max-w-xs sm:max-w-none">
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 mb-14 w-full max-w-xs sm:max-w-none">
           <a
             href="#story"
+            onClick={e => { if (window.location.pathname !== '/') { e.preventDefault(); window.location.href='/#story'; } }}
             className="
               flex items-center justify-center w-full sm:w-auto
               min-h-[52px] px-9 py-3 rounded-full
-              border-2 border-cream/65 text-cream
+              border-2 border-cream/55 text-cream
               font-sans font-semibold tracking-wide text-base sm:text-lg
               hover:bg-cream/10 active:bg-cream/20
               transition-colors duration-200
@@ -194,8 +75,8 @@ export default function Hero() {
           >
             Our Story
           </a>
-          <a
-            href="/register"
+          <Link
+            to="/register"
             className="
               flex items-center justify-center w-full sm:w-auto
               min-h-[52px] px-9 py-3 rounded-full
@@ -206,16 +87,13 @@ export default function Hero() {
             "
           >
             Register Your Plant
-          </a>
+          </Link>
         </div>
 
-        {/* Stat circle */}
+        {/* Stat circle — thin gold border ring, no fill */}
         <div
-          className="
-            flex flex-col items-center justify-center
-            w-40 h-40 sm:w-44 sm:h-44 rounded-full
-            bg-forest border-2 border-cream/20 shadow-xl
-          "
+          className="flex flex-col items-center justify-center w-40 h-40 sm:w-44 sm:h-44 rounded-full"
+          style={{ border: '1.5px solid #c9a96e' }}
           aria-label="200,000 plus saplings distributed"
         >
           <span
@@ -224,7 +102,7 @@ export default function Hero() {
           >
             200,000+
           </span>
-          <span className="font-sans text-xs sm:text-sm text-cream/75 mt-1.5 px-4 leading-snug">
+          <span className="font-sans text-xs sm:text-sm text-cream/70 mt-1.5 px-4 leading-snug">
             Saplings Distributed
           </span>
         </div>
