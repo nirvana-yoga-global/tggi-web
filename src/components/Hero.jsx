@@ -60,7 +60,7 @@ export default function Hero() {
         </p>
 
         {/* Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 mb-14 w-full max-w-xs sm:max-w-none">
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-xs sm:max-w-none">
           <a
             href="#story"
             onClick={e => { if (window.location.pathname !== '/') { e.preventDefault(); window.location.href='/#story'; } }}
@@ -88,23 +88,6 @@ export default function Hero() {
           >
             Register Your Plant
           </Link>
-        </div>
-
-        {/* Stat circle — thin gold border ring, no fill */}
-        <div
-          className="flex flex-col items-center justify-center w-40 h-40 sm:w-44 sm:h-44 rounded-full"
-          style={{ border: '1.5px solid #c9a96e' }}
-          aria-label="200,000 plus saplings distributed"
-        >
-          <span
-            className="font-serif font-semibold text-cream leading-none"
-            style={{ fontSize: 'clamp(1.6rem, 5vw, 2.2rem)' }}
-          >
-            200,000+
-          </span>
-          <span className="font-sans text-xs sm:text-sm text-cream/70 mt-1.5 px-4 leading-snug">
-            Saplings Distributed
-          </span>
         </div>
 
       </div>
