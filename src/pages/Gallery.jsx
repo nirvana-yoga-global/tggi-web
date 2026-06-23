@@ -136,16 +136,28 @@ function Spinner() {
 export default function Gallery() {
   const [plants,        setPlants]        = useState([])
   const [loading,       setLoading]       = useState(true)
+  const [fetchError,    setFetchError]    = useState('')
   const [activeFilter,  setActiveFilter]  = useState('All')
 
   useEffect(() => {
     async function fetchPlants() {
-      if (!supabase) { setLoading(false); return }
+      if (!supabase) {
+        setFetchError('Supabase client not initialised — check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env')
+        setLoading(false)
+        return
+      }
       const { data, error } = await supabase
         .from('tggi_registrations')
         .select('id, full_name, plant_name, category, location, first_photo_url')
         .order('created_at', { ascending: false })
-      if (!error && data) setPlants(data)
+
+      console.log('[Gallery] Supabase response — data:', data, '| error:', error)
+
+      if (error) {
+        setFetchError(`Supabase error: ${error.message}`)
+      } else {
+        setPlants(data ?? [])
+      }
       setLoading(false)
     }
     fetchPlants()
@@ -226,7 +238,17 @@ export default function Gallery() {
 
         {loading && <Spinner />}
 
-        {!loading && filtered.length === 0 && (
+        {!loading && fetchError && (
+          <div
+            className="mx-auto max-w-lg mt-4 mb-10 px-5 py-4 rounded-xl border font-sans text-base leading-relaxed"
+            style={{ backgroundColor: 'rgba(196,98,61,0.07)', borderColor: 'rgba(196,98,61,0.3)', color: '#c4623d' }}
+            role="alert"
+          >
+            ⚠ {fetchError}
+          </div>
+        )}
+
+        {!loading && !fetchError && filtered.length === 0 && (
           <div className="flex flex-col items-center text-center py-24 gap-5">
             {/* Leaf illustration */}
             <svg width="60" height="75" viewBox="0 0 60 75" fill="none" aria-hidden="true">
@@ -247,7 +269,7 @@ export default function Gallery() {
           </div>
         )}
 
-        {!loading && filtered.length > 0 && (
+        {!loading && !fetchError && filtered.length > 0 && (
           /* CSS masonry via columns */
           <div className="columns-1 sm:columns-2 lg:columns-3 gap-5">
             {filtered.map((plant, i) => (
