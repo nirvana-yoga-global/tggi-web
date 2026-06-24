@@ -87,7 +87,7 @@ export default function GalleryPreview() {
         supabase
           .from('tggi_registrations')
           .select('id, plant_name, category, location, first_photo_url')
-          .eq('is_approved', true)
+          .eq('is_flagged', false)
           .order('created_at', { ascending: false })
           .limit(6),
         supabase

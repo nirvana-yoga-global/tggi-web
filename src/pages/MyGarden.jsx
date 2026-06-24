@@ -71,7 +71,7 @@ function PlantCard({ plant, updates }) {
           >
             {plant.category}
           </span>
-          {!plant.is_approved && (
+          {plant.is_flagged && (
             <span
               className="inline-block font-sans text-xs font-semibold rounded-full px-3 py-1"
               style={{ backgroundColor: 'rgba(201,169,110,0.18)', color: '#7a5c1e', border: '1px solid rgba(201,169,110,0.4)' }}
@@ -141,7 +141,7 @@ export default function MyGarden() {
 
     const { data: regs, error: regErr } = await supabase
       .from('tggi_registrations')
-      .select('id, created_at, full_name, plant_name, category, location, first_photo_url, status, is_approved')
+      .select('id, created_at, full_name, plant_name, category, location, first_photo_url, status, is_flagged')
       .eq('phone', trimmed)
       .order('created_at', { ascending: true })
 
