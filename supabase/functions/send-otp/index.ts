@@ -46,7 +46,7 @@ serve(async (req) => {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'TGGI — One Soul One Tree', email: 'noreply@nirvanayogaglobal.com' },
+        sender: { name: 'Nirvana Yoga Global', email: 'info@nirvanayogaglobal.com' },
         to: [{ email }],
         subject: 'Your TGGI Verification Code — Jai Madhav ji',
         htmlContent: `
