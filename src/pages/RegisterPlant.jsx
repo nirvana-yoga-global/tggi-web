@@ -110,7 +110,7 @@ function SuccessScreen({ fullName, plantName, nygId }) {
             transition-colors duration-200 min-h-[52px]
           "
         >
-          My Garden →
+          View My Garden →
         </Link>
         <Link
           to="/gallery"
@@ -122,7 +122,7 @@ function SuccessScreen({ fullName, plantName, nygId }) {
             transition-colors duration-200 min-h-[52px]
           "
         >
-          View Gallery
+          View Community Gallery →
         </Link>
       </div>
     </div>
@@ -138,7 +138,9 @@ export default function RegisterPlant() {
     phone:       '',
     plant_name:  '',
     category:    '',
-    location:    '',
+    city:        '',
+    state:       '',
+    country:     'India',
     first_photo: null,
     commitment:  false,
   })
@@ -222,7 +224,7 @@ export default function RegisterPlant() {
           email_verified:  true,
           plant_name:      form.plant_name.trim(),
           category:        form.category,
-          location:        form.location.trim() || null,
+          location:        [form.city, form.state, form.country].map(s => s.trim()).filter(Boolean).join(', ') || null,
           first_photo_url: publicUrl,
           nyg_id:          usedNygId,
           is_flagged:      false,
@@ -345,21 +347,41 @@ export default function RegisterPlant() {
             </div>
           </Field>
 
-          {/* Location */}
-          <Field
-            label="Your City & Country"
-            hint="Optional — shown publicly on your plant's profile."
-            error={errors.location}
-          >
-            <input
-              type="text"
-              value={form.location}
-              onChange={e => setField('location', e.target.value)}
-              className={inputClass}
-              placeholder="e.g. Kerala, India"
-              autoComplete="country-name"
-            />
-          </Field>
+          {/* Location — three fields combined into location column on save */}
+          <div className="mb-7">
+            <p className="font-sans font-semibold text-forest text-lg mb-1.5 leading-snug">
+              Location
+            </p>
+            <p className="font-sans text-forest/55 text-base mb-3 leading-snug">
+              Optional — shown publicly on your plant's profile.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <input
+                type="text"
+                value={form.city}
+                onChange={e => setField('city', e.target.value)}
+                placeholder="City"
+                className={inputClass}
+                autoComplete="address-level2"
+              />
+              <input
+                type="text"
+                value={form.state}
+                onChange={e => setField('state', e.target.value)}
+                placeholder="State"
+                className={inputClass}
+                autoComplete="address-level1"
+              />
+              <input
+                type="text"
+                value={form.country}
+                onChange={e => setField('country', e.target.value)}
+                placeholder="Country"
+                className={inputClass}
+                autoComplete="country-name"
+              />
+            </div>
+          </div>
 
           {/* First Photo */}
           <Field label="Upload your first photo of the plant" required error={errors.first_photo}>
