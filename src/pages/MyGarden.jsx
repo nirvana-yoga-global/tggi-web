@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-IN', {
@@ -48,7 +49,6 @@ function PlantCard({ plant, updates }) {
       className="rounded-2xl overflow-hidden bg-white border border-forest/8 shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200"
       onClick={() => navigate(`/plant/${plant.id}?mine=true`)}
     >
-      {/* Photo */}
       {latestPhoto && !imgError ? (
         <img
           src={latestPhoto}
@@ -62,7 +62,6 @@ function PlantCard({ plant, updates }) {
         <LeafPlaceholder />
       )}
 
-      {/* Info */}
       <div className="px-4 pt-3.5 pb-5">
         <div className="flex flex-wrap items-center gap-2 mb-2">
           <span
@@ -118,35 +117,33 @@ function PlantCard({ plant, updates }) {
 }
 
 export default function MyGarden() {
-  const [phone,    setPhone]    = useState('')
-  const [loading,  setLoading]  = useState(false)
-  const [searched, setSearched] = useState(false)
+  const { user, profile } = useAuth()
+  const [loading,  setLoading]  = useState(true)
   const [plants,   setPlants]   = useState([])
   const [updates,  setUpdates]  = useState({})
   const [error,    setError]    = useState('')
 
-  async function handleLookup(e) {
-    e.preventDefault()
-    const trimmed = phone.trim()
-    if (!trimmed) return
+  const firstName = profile?.full_name?.split(' ')[0]
+    ?? user?.user_metadata?.full_name?.split(' ')[0]
+    ?? ''
 
-    if (!supabase) {
-      setError('Supabase not configured — check your .env file.')
-      return
-    }
+  useEffect(() => {
+    if (!user || !supabase) { setLoading(false); return }
+    loadPlants()
+  }, [user])
 
+  async function loadPlants() {
     setLoading(true)
     setError('')
-    setSearched(false)
 
-    const { data: regs, error: regErr } = await supabase
-      .from('tggi_registrations')
-      .select('id, created_at, full_name, plant_name, category, location, first_photo_url, status, is_flagged')
-      .eq('phone', trimmed)
-      .order('created_at', { ascending: true })
+    const query = profile?.nyg_id
+      ? supabase.from('tggi_registrations').select('id, created_at, full_name, plant_name, category, location, first_photo_url, status, is_flagged').eq('nyg_id', profile.nyg_id)
+      : supabase.from('tggi_registrations').select('id, created_at, full_name, plant_name, category, location, first_photo_url, status, is_flagged').eq('email', user.email)
+
+    const { data: regs, error: regErr } = await query.order('created_at', { ascending: true })
 
     if (regErr) {
-      setError(`Error: ${regErr.message}`)
+      setError(`Error loading plants: ${regErr.message}`)
       setLoading(false)
       return
     }
@@ -154,7 +151,6 @@ export default function MyGarden() {
     if (!regs || regs.length === 0) {
       setPlants([])
       setUpdates({})
-      setSearched(true)
       setLoading(false)
       return
     }
@@ -174,11 +170,8 @@ export default function MyGarden() {
 
     setPlants(regs)
     setUpdates(updatesMap)
-    setSearched(true)
     setLoading(false)
   }
-
-  const firstName = plants[0]?.full_name?.split(' ')[0] ?? ''
 
   return (
     <div className="min-h-screen bg-cream">
@@ -197,54 +190,14 @@ export default function MyGarden() {
             className="font-serif font-semibold text-forest leading-[1.05] mb-4"
             style={{ fontSize: 'clamp(2.2rem, 7vw, 3.5rem)' }}
           >
-            Welcome Back
+            {firstName ? `Welcome, ${firstName}` : 'My Garden'}
           </h1>
-          <p className="font-sans text-forest/65 text-lg leading-relaxed">
-            Enter your WhatsApp number to access your garden.
-          </p>
+          {profile?.nyg_id && (
+            <p className="font-sans text-forest/45 text-sm">
+              NYG ID: <span className="font-mono font-semibold text-forest/60">{profile.nyg_id}</span>
+            </p>
+          )}
         </div>
-
-        {/* Phone lookup form */}
-        <form onSubmit={handleLookup} className="mb-8" noValidate>
-          <label className="block font-sans font-semibold text-forest text-lg mb-2">
-            Phone Number
-          </label>
-          <div className="flex gap-3">
-            <input
-              type="tel"
-              value={phone}
-              onChange={e => { setPhone(e.target.value); setSearched(false) }}
-              placeholder="+91 98765 43210"
-              autoComplete="tel"
-              className="
-                flex-1 min-h-[56px] px-4 py-3 rounded-xl
-                border-2 border-forest/20 bg-white
-                font-sans text-forest text-xl
-                focus:outline-none focus:border-forest
-                transition-colors placeholder:text-forest/30
-              "
-            />
-            <button
-              type="submit"
-              disabled={loading || !phone.trim()}
-              className="
-                flex-shrink-0 min-h-[56px] px-7 rounded-xl
-                bg-terracotta text-white
-                font-sans font-bold text-lg
-                hover:bg-terracotta-dark
-                disabled:opacity-50 disabled:cursor-not-allowed
-                transition-colors duration-150
-              "
-            >
-              {loading ? (
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-              ) : 'Find'}
-            </button>
-          </div>
-        </form>
 
         {/* Error */}
         {error && (
@@ -259,17 +212,17 @@ export default function MyGarden() {
 
         {loading && <Spinner />}
 
-        {/* No results */}
-        {searched && !loading && plants.length === 0 && (
+        {/* No plants */}
+        {!loading && plants.length === 0 && (
           <div className="text-center py-12">
             <p className="font-serif text-forest/60 leading-relaxed mb-3" style={{ fontSize: 'clamp(1.2rem, 3vw, 1.5rem)' }}>
-              No plants found with this number.
+              Your garden is waiting to grow.
             </p>
             <p className="font-sans text-forest/50 text-base mb-8">
-              Would you like to register your first plant?
+              Register your first plant to begin your journey.
             </p>
             <Link
-              to="/register"
+              to="/register-plant"
               className="
                 inline-flex items-center justify-center min-h-[52px]
                 px-9 rounded-full
@@ -278,21 +231,14 @@ export default function MyGarden() {
                 hover:bg-terracotta-dark transition-colors duration-150
               "
             >
-              Register Your Plant
+              Register Your First Plant
             </Link>
           </div>
         )}
 
-        {/* Results */}
-        {searched && !loading && plants.length > 0 && (
+        {/* Plant grid */}
+        {!loading && plants.length > 0 && (
           <div>
-            <h2
-              className="font-serif font-semibold text-forest leading-snug mb-8"
-              style={{ fontSize: 'clamp(1.6rem, 5vw, 2.5rem)' }}
-            >
-              Welcome back, {firstName}!
-            </h2>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
               {plants.map(plant => (
                 <PlantCard
@@ -305,7 +251,7 @@ export default function MyGarden() {
 
             <div className="text-center">
               <Link
-                to="/register"
+                to="/register-plant"
                 className="
                   inline-flex items-center justify-center min-h-[52px]
                   px-9 rounded-full
