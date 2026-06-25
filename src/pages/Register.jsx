@@ -75,7 +75,10 @@ export default function Register() {
     const { data, error } = await supabase.auth.signUp({
       email: form.email.trim(),
       password: form.password,
-      options: { data: { full_name: form.full_name.trim() } },
+      options: {
+        data: { full_name: form.full_name.trim() },
+        emailRedirectTo: 'https://tggi-web.vercel.app',
+      },
     })
 
     if (error) {
