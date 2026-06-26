@@ -218,6 +218,7 @@ export default function RegisterPlant() {
       const { error: insertErr } = await supabase
         .from('tggi_registrations')
         .insert({
+          user_id:         user.id,
           full_name:       form.full_name.trim(),
           phone:           form.phone.trim(),
           email:           user.email,
